@@ -13,6 +13,7 @@
     <script type="text/javascript" src="js/luxon.min.js"></script>
     <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="js/listFiles.js"></script>
+    <script type="text/javascript" src="js/upload.js"></script>
     <!-- <script type="text/javascript" src="js/tabulator.min.js"></script> -->
     <!-- <script type="text/javascript" src="js/jquery_wrapper.js"></script> -->
     <!-- <script type="text/javascript" src="js/utils.js"></script> -->
@@ -31,13 +32,16 @@
     <div id="upload" class="container">
         <div class="mb-3">
             <label for="formFile" class="form-label">File excel da dividere</label>
-            <input class="form-control" type="file" id="formFile">
+            <input class="form-control" type="file" id="formFile" accept=".xls, .xlsx">
         </div>
         <div class="mb-3">
-            <input class="button form-control" type="submit" id="submitbutton">
+            <input class="button form-control" type="submit" id="submitbutton" onclick="upload()">
         </div>
     </div>
-    <div id="results" class="container">
+    <div class="container">
+        <label for="results" class="form-label">File disponibili per il download</label>
+        <div id="results" class="mb-3">
+        </div>
     </div>
     <!-- <div id="firma"><a href="https://ivopugliese.it">©2022 Ivo Pugliese</a></div> -->
     <script>       
