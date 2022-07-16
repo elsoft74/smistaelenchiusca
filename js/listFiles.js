@@ -14,8 +14,6 @@ function listFiles(target) {
                     filepath = files[file];
                     tmp = filepath.split("/");
                     filename = tmp[tmp.length-1];
-                    console.log(filepath);
-                    console.log(filename);
                     el = $("<a>").attr({"href":filepath,"target":"_blank"}).text(filename);
                     $(div).append(el);
                     el = $("<BR>");

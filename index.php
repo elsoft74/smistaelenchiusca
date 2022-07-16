@@ -9,8 +9,8 @@
     <!-- <link href="css/tabulator_materialize.min.css" rel="stylesheet"> -->
     <!-- <link rel="stylesheet" href="css/style.css"> -->
     <link rel="stylesheet" href="css/sweetalert2.min.css">
-    <script type="text/javascript" src="js/moment-with-locales.min.js"></script>
-    <script type="text/javascript" src="js/luxon.min.js"></script>
+    <!-- <script type="text/javascript" src="js/moment-with-locales.min.js"></script> -->
+    <!-- <script type="text/javascript" src="js/luxon.min.js"></script> -->
     <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="js/listFiles.js"></script>
     <script type="text/javascript" src="js/upload.js"></script>
@@ -30,13 +30,16 @@
 
 <body>
     <div id="upload" class="container">
-        <div class="mb-3">
-            <label for="formFile" class="form-label">File excel da dividere</label>
-            <input class="form-control" type="file" id="formFile" accept=".xls, .xlsx">
-        </div>
-        <div class="mb-3">
-            <input class="button form-control" type="submit" id="submitbutton" onclick="upload()">
-        </div>
+        <!-- <form enctype="multipart/form-data" method="post" action="be/upload.php"> -->
+        <form enctype="multipart/form-data" method="post">
+            <div class="mb-3">
+                <label for="formFile" class="form-label">File excel da dividere</label>
+                <input class="form-control" name="file" type="file" id="formFile" accept=".xls, .xlsx">
+            </div>
+            <div class="mb-3">
+                <input class="button form-control" type="submit" id="submitbutton" onclick="upload()">
+            </div>
+        </form>
     </div>
     <div class="container">
         <label for="results" class="form-label">File disponibili per il download</label>

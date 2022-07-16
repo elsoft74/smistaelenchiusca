@@ -1,18 +1,19 @@
 <?php
+    // ini_set('display_errors', 1);
+    // ini_set('display_startup_errors', 1);
+    // error_reporting(E_ALL);
+    include_once("../classes/dividi.php");
     $out = new StdClass();
     $out->status="KO";
+    //$out->head=getallheaders();
     try{
-        $rawData = file_get_contents("php://input");
-        $path="/var/www/html/smistaelenchiusca/output/out.xlsx";
-        if (!$fp = fopen($path, "wb")) {
-            throw new Exception("Non posso aprire il file di output: ".$path); 
-        }
-        if (fwrite($fp, $rawData) === FALSE) {
-            throw new Exception("Non posso scrivere il file di output.");
-        }
+        $fileName = $_FILES["file"]["name"]; 
+        $fileTmpLoc = $_FILES["file"]["tmp_name"];
+        Dividi::elabora($fileTmpLoc);
         $out->status="OK";
     } catch(Exception $ex){
-        $out->debug=$ex->getMessage();
+        $out->error=$ex->getMessage();
+        $out->debug=print_r($_FILES,false);
     }
     echo(json_encode($out));
 ?>
