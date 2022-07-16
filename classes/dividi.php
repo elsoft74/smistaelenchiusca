@@ -1,38 +1,53 @@
 <?php
-    // require __DIR__ . '/vendor/autoload.php';
     require '../vendor/autoload.php';
+    require_once("db.php");
+    ini_set('memory_limit', '128M');
     use PhpOffice\PhpSpreadsheet\IOFactory;
     use PhpOffice\PhpSpreadsheet\Spreadsheet;
+    
     Class Dividi{
         static function elabora($fileTmpLoc){
-            $messina = Dividi::inizializza();
-            $messinaArr = [];
-            $altri = Dividi::inizializza();
-            $altriArr = [];
-            $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($fileTmpLoc);
-            $reader->setReadDataOnly(true);
-            $spreadsheet = $reader->load($fileTmpLoc);
-            $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-            array_shift($sheetData);
-            foreach ($sheetData as $row){
-                if('Tampone a 7 giorni'==$row['M']){
-                    $row['M']=7+$row['I'];
+            //echo("elabora");
+            //echo($fileTmpLoc);
+            if(null!=$fileTmpLoc){
+                $messina = Dividi::inizializza();
+                $messinaArr = [];
+                $altri = Dividi::inizializza();
+                $altriArr = [];
+                $taormina = Dividi::inizializza();
+                $taorminaArr = [];
+                $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($fileTmpLoc);
+                $reader->setReadDataOnly(true);
+                $spreadsheet = $reader->load($fileTmpLoc);
+                $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+                array_shift($sheetData);
+                foreach ($sheetData as $row){
+                    //var_dump($row);
+                    if('Tampone a 7 giorni'==$row['M']){
+                        $row['M']=7+$row['I'];
+                    }
+                    if('Tampone a 10 giorni'==$row['M']){
+                        $row['M']=10+$row['I'];
+                    }
+                    $dom = Dividi::getUsca($row['G']);
+                    switch($dom){
+                        case ('MESSINA'):
+                            array_push($messinaArr,$row);
+                            break;
+                        case ('TAORMINA'):
+                            array_push($taorminaArr,$row);
+                            break;
+                        default:
+                            array_push($altriArr,$row);
+                    }
                 }
-                if('Tampone a 10 giorni'==$row['M']){
-                    $row['M']=10+$row['I'];
-                }
-                switch($row['G']){
-                    case ('MESSINA (ME)'):
-                        array_push($messinaArr,$row);
-                        break;
-                    default:
-                        array_push($altriArr,$row);
-                }
-            }
-            $messina->getActiveSheet()->fromArray($messinaArr, null, 'A2');
-            $altri->getActiveSheet()->fromArray($altriArr, null, 'A2');
-            Dividi::salva($messina,"Messina");
-            Dividi::salva($altri,"Altri");
+                $messina->getActiveSheet()->fromArray($messinaArr, null, 'A2');
+                $taormina->getActiveSheet()->fromArray($taorminaArr, null, 'A2');
+                $altri->getActiveSheet()->fromArray($altriArr, null, 'A2');
+                Dividi::salva($messina,"Messina");
+                Dividi::salva($taormina,"Taormina");
+                Dividi::salva($altri,"Altri");
+            }   
         }
 
         static function inizializza(){
@@ -63,5 +78,10 @@
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);
             $pathAndName="../output/".$now->format("YmdHi")."_".$usca.".xlsx";
             $writer->save($pathAndName);
+        }
+
+        static function getUsca($val){
+            $out = (DB::getUscaFromLocalita($val))->data;
+            return $out;
         }
     }
