@@ -1,4 +1,5 @@
 #config
 config/config.php
-output/*
+output/*.xls
+output/*.xlsx
 test.php
