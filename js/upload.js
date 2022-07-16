@@ -20,7 +20,8 @@ function upload() {
         if (xhr.readyState === 4 && xhr.status === 200) {
             let result = JSON.parse(xhr.responseText);
             if (result.status == "OK") {
-                listFiles("#results");
+                //listFiles("#results");
+                location.reload();
             } else {
                 Swal.fire({
                     text: result.error,
