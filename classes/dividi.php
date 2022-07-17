@@ -10,12 +10,32 @@
             //echo("elabora");
             //echo($fileTmpLoc);
             if(null!=$fileTmpLoc){
+                $barcellona = Dividi::inizializza();
+                $barcellonaArr = [];
+                $lipari = Dividi::inizializza();
+                $lipariArr = [];
                 $messina = Dividi::inizializza();
                 $messinaArr = [];
-                $altri = Dividi::inizializza();
-                $altriArr = [];
+                $milazzo = Dividi::inizializza();
+                $milazzoArr = [];
+                $milazzoBarcellona = Dividi::inizializza();
+                $milazzoBarcellonaArr = [];
+                $mistretta = Dividi::inizializza();
+                $mistrettaArr = [];
+                $patti = Dividi::inizializza();
+                $pattiArr = [];
+                $roccalumera = Dividi::inizializza();
+                $roccalumeraArr = [];
+                $santagata = Dividi::inizializza();
+                $santagataArr = [];
+                $saponara = Dividi::inizializza();
+                $saponaraArr = [];
                 $taormina = Dividi::inizializza();
                 $taorminaArr = [];
+                
+                $altri = Dividi::inizializza();
+                $altriArr = [];
+
                 $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($fileTmpLoc);
                 $reader->setReadDataOnly(true);
                 $spreadsheet = $reader->load($fileTmpLoc);
@@ -31,8 +51,35 @@
                     }
                     $dom = Dividi::getUsca($row['G']);
                     switch($dom){
+                        case ('BARCELLONA'):
+                            array_push($barcellonaArr,$row);
+                            break;
+                        case ('LIPARI'):
+                            array_push($lipariArr,$row);
+                            break;
                         case ('MESSINA'):
                             array_push($messinaArr,$row);
+                            break;
+                        case ('MILAZZO'):
+                            array_push($milazzoArr,$row);
+                            break;
+                        case ('MILAZZOBARCELLONA'):
+                            array_push($milazzoBarcellonaArr,$row);
+                            break;
+                        case ('MISTRETTA'):
+                            array_push($mistrettaArr,$row);
+                            break;
+                        case ('PATTI'):
+                            array_push($pattiArr,$row);
+                            break;
+                        case ('ROCCALUMERA'):
+                            array_push($roccalumeraArr,$row);
+                            break;
+                        case ('SANTAGATA'):
+                            array_push($santagataArr,$row);
+                            break;
+                        case ('SAPONARA'):
+                            array_push($saponaraArr,$row);
                             break;
                         case ('TAORMINA'):
                             array_push($taorminaArr,$row);
@@ -41,12 +88,20 @@
                             array_push($altriArr,$row);
                     }
                 }
-                $messina->getActiveSheet()->fromArray($messinaArr, null, 'A2');
-                $taormina->getActiveSheet()->fromArray($taorminaArr, null, 'A2');
-                $altri->getActiveSheet()->fromArray($altriArr, null, 'A2');
-                Dividi::salva($messina,"Messina");
-                Dividi::salva($taormina,"Taormina");
-                Dividi::salva($altri,"Altri");
+
+                Dividi::controllaSalva($barcellona,$barcellonaArr,"Barcellona");
+                Dividi::controllaSalva($lipari,$lipariArr,"Lipari");
+                Dividi::controllaSalva($messina,$messinaArr,"Messina");
+                Dividi::controllaSalva($milazzo,$milazzoArr,"Milazzon");
+                Dividi::controllaSalva($milazzoBarcellona,$milazzoBarcellonaArr,"MilazzoBarcellona");
+                Dividi::controllaSalva($mistretta,$mistrettaArr,"Mistretta");
+                Dividi::controllaSalva($patti,$pattiArr,"Patti");
+                Dividi::controllaSalva($roccalumera,$roccalumeraArr,"Roccalumera");
+                Dividi::controllaSalva($santagata,$santagataArr,"SantAgata");
+                Dividi::controllaSalva($saponara,$saponaraArr,"Saponara");
+                Dividi::controllaSalva($taormina,$taorminaArr,"Taormina");
+                Dividi::controllaSalva($altri,$altriArr,"Altri");
+
             }   
         }
 
@@ -84,5 +139,12 @@
         static function getUsca($val){
             $out = (DB::getUscaFromLocalita($val))->data;
             return $out;
+        }
+
+        static function controllaSalva($sheet,$array,$label){
+            if ($array){
+                $sheet->getActiveSheet()->fromArray($array, null, 'A2');
+                Dividi::salva($sheet,$label);
+            }
         }
     }
