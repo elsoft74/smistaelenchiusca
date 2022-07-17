@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <!-- <link href="css/tabulator.min.css" rel="stylesheet"> -->
     <!-- <link href="css/tabulator_materialize.min.css" rel="stylesheet"> -->
-    <!-- <link rel="stylesheet" href="css/style.css"> -->
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/sweetalert2.min.css">
     <!-- <script type="text/javascript" src="js/moment-with-locales.min.js"></script> -->
     <!-- <script type="text/javascript" src="js/luxon.min.js"></script> -->
@@ -46,9 +46,11 @@
         <div id="results" class="mb-3">
         </div>
     </div>
+    <div id="loader"></div>
     <!-- <div id="firma"><a href="https://ivopugliese.it">©2022 Ivo Pugliese</a></div> -->
     <script>       
         window.onload = function() {
+            $("#loader").hide();
             listFiles("#results");
         };
     </script>

@@ -30,7 +30,7 @@
                     $stmt->execute();
                     $res=$stmt->fetch(PDO::FETCH_ASSOC);
                     //var_dump($res);
-                    $out->data=$res['chiave'];
+                    $out->data=($res)?$res['chiave']:"";
                     $out->status="OK";
                 } catch(Exception $ex){
                         $out->error=$ex->getMessage();

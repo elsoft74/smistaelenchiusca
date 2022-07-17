@@ -1,7 +1,7 @@
 <?php
     require '../vendor/autoload.php';
     require_once("db.php");
-    ini_set('memory_limit', '128M');
+    ini_set('memory_limit', '512M');
     use PhpOffice\PhpSpreadsheet\IOFactory;
     use PhpOffice\PhpSpreadsheet\Spreadsheet;
     
@@ -73,6 +73,7 @@
 
         static function salva($file,$usca){
             $now=new DateTime();
+            $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('M:M')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);

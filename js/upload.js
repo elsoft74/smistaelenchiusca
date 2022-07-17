@@ -1,6 +1,6 @@
 function upload() {
-    var f=$("#formFile").prop("files")[0];
-    if (f==undefined){
+    var f = $("#formFile").prop("files")[0];
+    if (f == undefined) {
         Swal.fire({
             text: "Nessun file da dividere.",
             icon: 'error',
@@ -15,20 +15,37 @@ function upload() {
     formData.append("file", f);
     xhr.open("POST", url, true);
     xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            let result = JSON.parse(xhr.responseText);
-            if (result.status == "OK") {
-                location.reload();
-            } else {
-                Swal.fire({
-                    text: result.error,
-                    icon: 'error',
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Ok'
-                });
+        try {
+            if (xhr.readyState === 4) {
+                $("#loader").hide();
+                if (xhr.status === 200) {
+                    let result = JSON.parse(xhr.responseText);
+                    if (result.status == "OK") {
+                        location.reload();
+                    } else if (result.status == "KO") {
+                        throw result.error;
+                    } else {
+                        throw "Errore nella risposta.";
+                    }
+                } else {
+                    throw "Stato della risposta: " + xhr.status;
+                }
             }
+        } catch (error) {
+            Swal.fire({
+                text: "File non elaborato.\n" + error,
+                icon: 'error',
+                showCancelButton: false,
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                location.reload();
+                }
+            );
         }
+
     }
+    $("#loader").show();
     xhr.send(formData);
+    event.preventDefault();
 }
