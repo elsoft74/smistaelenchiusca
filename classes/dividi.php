@@ -43,11 +43,11 @@
                 array_shift($sheetData);
                 foreach ($sheetData as $row){
                     //var_dump($row);
-                    if('Tampone a 7 giorni'==$row['M']){
-                        $row['M']=7+$row['I'];
+                    if('Tampone a 7 giorni'==$row['J']){
+                        $row['J']=7+$row['I'];
                     }
-                    if('Tampone a 10 giorni'==$row['M']){
-                        $row['M']=10+$row['I'];
+                    if('Tampone a 10 giorni'==$row['J']){
+                        $row['J']=10+$row['I'];
                     }
                     $dom = Dividi::getUsca($row['G']);
                     switch($dom){
@@ -117,12 +117,9 @@
                 ->setCellValue('G1', 'DOMICILIO')
                 ->setCellValue('H1', 'INDIRIZZO DOMICILIO')
                 ->setCellValue('I1', 'DATA TAMPONE')
-                ->setCellValue('J1', '')
-                ->setCellValue('K1', '')
-                ->setCellValue('L1', '')
-                ->setCellValue('M1', 'Giorno Tampone')
-                ->setCellValue('N1', 'Vax cell')
-                ->setCellValue('O1', 'Vax mail');
+                ->setCellValue('J1', 'Giorno Tampone')
+                ->setCellValue('K1', 'Vax cell')
+                ->setCellValue('L1', 'Vax mail');
             return $spreadsheet;
         }
 
@@ -130,7 +127,7 @@
             $now=new DateTime();
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
-            $file->getActiveSheet()->getStyle('M:M')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+            $file->getActiveSheet()->getStyle('J:J')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);
             $pathAndName="../output/".$now->format("YmdHi")."_".$usca.".xlsx";
             $writer->save($pathAndName);
