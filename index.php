@@ -14,6 +14,7 @@
     <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="js/listFiles.js"></script>
     <script type="text/javascript" src="js/upload.js"></script>
+    <script type="text/javascript" src="js/clean.js"></script>
     <!-- <script type="text/javascript" src="js/tabulator.min.js"></script> -->
     <!-- <script type="text/javascript" src="js/jquery_wrapper.js"></script> -->
     <!-- <script type="text/javascript" src="js/utils.js"></script> -->
@@ -44,6 +45,9 @@
     <div class="container">
         <label for="results" class="form-label">File disponibili per il download</label>
         <div id="results" class="mb-3">
+        </div>
+        <div class="mb-3">
+            <input class="button form-control" value="Pulisci" type="submit" id="submitbutton" onclick="clean()">
         </div>
     </div>
     <div id="loader"></div>
