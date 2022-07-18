@@ -44,10 +44,18 @@
                 foreach ($sheetData as $row){
                     //var_dump($row);
                     if('Tampone a 7 giorni'==$row['J']){
-                        $row['J']=7+$row['I'];
+                        if(!is_string($row['I'])){
+                            $row['J']=7+$row['I'];
+                        } else {
+                            $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P7D')))->format("d/m/Y");
+                        }
                     }
                     if('Tampone a 10 giorni'==$row['J']){
-                        $row['J']=10+$row['I'];
+                        if(!is_string($row['I'])){
+                            $row['J']=10+$row['I'];
+                        } else {
+                            $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P10D')))->format("d/m/Y");
+                        }
                     }
                     $dom = Dividi::getUsca($row['G']);
                     switch($dom){
