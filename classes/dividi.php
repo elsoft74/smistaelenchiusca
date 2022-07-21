@@ -4,6 +4,8 @@
     ini_set('memory_limit', '512M');
     use PhpOffice\PhpSpreadsheet\IOFactory;
     use PhpOffice\PhpSpreadsheet\Spreadsheet;
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\Exception;
     
     Class Dividi{
         static function elabora($fileTmpLoc){
@@ -137,8 +139,23 @@
             $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('J:J')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);
-            $pathAndName="../output/".$now->format("YmdHi")."_".$usca.".xlsx";
+            $filename = $now->format("YmdHi")."_".$usca.".xlsx";
+            $pathAndName="../output/".$filename;
             $writer->save($pathAndName);
+            
+            try {
+                $email = new PHPMailer();
+$email->SetFrom('piattaformeinformatiche.covid@asp.messina.it', 'Piattaforme Informatiche'); //Name is optional
+$email->Subject   = 'Tamponi';
+$email->Body      = "In allegato i tamponi odierni.";
+$email->AddAddress( 'piattaformeinformatiche.covid@asp.messina.it' );
+$email->AddAttachment( $pathAndName , $filename );
+$email->Send();
+            } catch(Exception $ex){
+            }
+            
+
+           
         }
 
         static function getUsca($val){
