@@ -148,7 +148,7 @@
 $email->SetFrom('piattaformeinformatiche.covid@asp.messina.it', 'Piattaforme Informatiche'); //Name is optional
 $email->Subject   = 'Tamponi';
 $email->Body      = "In allegato i tamponi odierni.";
-$email->AddAddress( 'piattaformeinformatiche.covid@asp.messina.it' );
+$email->AddAddress( 'laboratori.covid@asp.messina.it' );
 $email->AddAttachment( $pathAndName , $filename );
 $email->Send();
             } catch(Exception $ex){
