@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'f84da6b0074ff38ee3c4f8e17e3ab43f2b55f6ef',
+    'reference' => 'ff5b33336385f7f2c47841524b6a7d97563f248d',
     'name' => '__root__',
   ),
   'versions' => 
@@ -18,7 +18,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'f84da6b0074ff38ee3c4f8e17e3ab43f2b55f6ef',
+      'reference' => 'ff5b33336385f7f2c47841524b6a7d97563f248d',
     ),
     'ezyang/htmlpurifier' => 
     array (
@@ -65,14 +65,23 @@
       ),
       'reference' => 'b942d263c641ddb5190929ff840c68f78713e937',
     ),
-    'phpoffice/phpspreadsheet' => 
+    'phpmailer/phpmailer' => 
     array (
-      'pretty_version' => '1.24.0',
-      'version' => '1.24.0.0',
+      'pretty_version' => 'v6.6.3',
+      'version' => '6.6.3.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'ebe8745c92a7cac4514d040758393b5399633b83',
+      'reference' => '9400f305a898f194caff5521f64e5dfa926626f3',
+    ),
+    'phpoffice/phpspreadsheet' => 
+    array (
+      'pretty_version' => '1.24.1',
+      'version' => '1.24.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '69991111e05fca3ff7398e1e7fca9ebed33efec6',
     ),
     'psr/http-client' => 
     array (

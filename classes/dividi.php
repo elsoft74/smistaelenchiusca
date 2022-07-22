@@ -6,11 +6,15 @@
     use PhpOffice\PhpSpreadsheet\Spreadsheet;
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
+    use PHPMailer\PHPMailer\SMTP;
     
     Class Dividi{
         static function elabora($fileTmpLoc){
             //echo("elabora");
             //echo($fileTmpLoc);
+            $out = new StdClass();
+            $out->status = "KO";
+            $out->data = new StdClass();
             if(null!=$fileTmpLoc){
                 $barcellona = Dividi::inizializza();
                 $barcellonaArr = [];
@@ -99,20 +103,21 @@
                     }
                 }
 
-                Dividi::controllaSalva($barcellona,$barcellonaArr,"Barcellona");
-                Dividi::controllaSalva($lipari,$lipariArr,"Lipari");
-                Dividi::controllaSalva($messina,$messinaArr,"Messina");
-                Dividi::controllaSalva($milazzo,$milazzoArr,"Milazzon");
-                Dividi::controllaSalva($milazzoBarcellona,$milazzoBarcellonaArr,"MilazzoBarcellona");
-                Dividi::controllaSalva($mistretta,$mistrettaArr,"Mistretta");
-                Dividi::controllaSalva($patti,$pattiArr,"Patti");
-                Dividi::controllaSalva($roccalumera,$roccalumeraArr,"Roccalumera");
-                Dividi::controllaSalva($santagata,$santagataArr,"SantAgata");
-                Dividi::controllaSalva($saponara,$saponaraArr,"Saponara");
-                Dividi::controllaSalva($taormina,$taorminaArr,"Taormina");
-                Dividi::controllaSalva($altri,$altriArr,"Altri");
-
-            }   
+                $out->data->barcellona=Dividi::controllaSalva($barcellona,$barcellonaArr,"Barcellona");
+                $out->data->lipari=Dividi::controllaSalva($lipari,$lipariArr,"Lipari");
+                $out->data->messina=Dividi::controllaSalva($messina,$messinaArr,"Messina");
+                $out->data->milazzo=Dividi::controllaSalva($milazzo,$milazzoArr,"Milazzo");
+                $out->data->milazzobarcellona=Dividi::controllaSalva($milazzoBarcellona,$milazzoBarcellonaArr,"MilazzoBarcellona");
+                $out->data->mistretta=Dividi::controllaSalva($mistretta,$mistrettaArr,"Mistretta");
+                $out->data->patti=Dividi::controllaSalva($patti,$pattiArr,"Patti");
+                $out->data->roccalumera=Dividi::controllaSalva($roccalumera,$roccalumeraArr,"Roccalumera");
+                $out->data->santagata=Dividi::controllaSalva($santagata,$santagataArr,"SantAgata");
+                $out->data->saponara=Dividi::controllaSalva($saponara,$saponaraArr,"Saponara");
+                $out->data->taormina=Dividi::controllaSalva($taormina,$taorminaArr,"Taormina");
+                $out->data->altri=Dividi::controllaSalva($altri,$altriArr,"Altri");
+                $out->status="OK";
+            }
+            return $out;   
         }
 
         static function inizializza(){
@@ -144,16 +149,26 @@
             $writer->save($pathAndName);
             
             try {
-                $email = new PHPMailer();
-$email->SetFrom('piattaformeinformatiche.covid@asp.messina.it', 'Piattaforme Informatiche'); //Name is optional
-$email->Subject   = 'Tamponi';
-$email->Body      = "In allegato i tamponi odierni.";
-$email->AddAddress( 'laboratori.covid@asp.messina.it' );
-$email->AddAttachment( $pathAndName , $filename );
-$email->Send();
+                $email = new PHPMailer(true);
+                //$email->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+                $email->isSMTP();                                            //Send using SMTP
+                $email->Host       = SENDERSERVER;                     //Set the SMTP server to send through
+                $email->SMTPAuth   = true;                                   //Enable SMTP authentication
+                $email->Username   = SENDERUSERNAME;                     //SMTP username
+                $email->Password   = SENDERPASSWORD;                               //SMTP password
+                $email->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+                $email->Port       = SENDERPORT; 
+                $email->SetFrom(SENDEREMAIL, SENDERNAME); //Name is optional
+                $email->Subject   = 'Tamponi '.$filename;
+                $email->Body      = "In allegato i tamponi odierni.";
+                $email->AddAddress( 'piattaformeinformatiche.covid@asp.messina.it' );
+                $email->AddAttachment( $pathAndName , $filename );
+                $email->Send();
+                return true;
             } catch(Exception $ex){
+                return $ex->ErrorInfo();
             }
-            
+            return true;
 
            
         }

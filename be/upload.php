@@ -1,7 +1,7 @@
 <?php
-    // ini_set('display_errors', 1);
-    // ini_set('display_startup_errors', 1);
-    // error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
     include_once("../classes/dividi.php");
     $out = new StdClass();
     $out->status="KO";
@@ -9,8 +9,8 @@
     try{
         $fileName = $_FILES["file"]["name"]; 
         $fileTmpLoc = $_FILES["file"]["tmp_name"];
-        Dividi::elabora($fileTmpLoc);
-        $out->status="OK";
+        $out=Dividi::elabora($fileTmpLoc);
+        //$out->status="OK";
     } catch(Exception $ex){
         $out->error=$ex->getMessage();
         $out->debug=print_r($_FILES,false);
