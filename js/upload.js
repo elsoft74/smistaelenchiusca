@@ -21,7 +21,15 @@ function upload() {
                 if (xhr.status === 200) {
                     let result = JSON.parse(xhr.responseText);
                     if (result.status == "OK") {
-                        location.reload();
+                        Swal.fire({
+                            text: "Operazione completata.\n" + JSON.stringify(result.data),
+                            icon: 'info',
+                            showCancelButton: false,
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'Ok'
+                        }).then(() => {
+                            location.reload();
+                        });
                     } else if (result.status == "KO") {
                         throw result.error;
                     } else {
@@ -40,7 +48,7 @@ function upload() {
                 confirmButtonText: 'Ok'
             }).then(() => {
                 location.reload();
-                }
+            }
             );
         }
 

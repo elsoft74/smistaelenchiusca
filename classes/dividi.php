@@ -139,6 +139,8 @@
         }
 
         static function salva($file,$usca){
+            $out = null;
+            date_default_timezone_set("Etc/UTC");
             $now=new DateTime();
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
@@ -147,30 +149,32 @@
             $filename = $now->format("YmdHi")."_".$usca.".xlsx";
             $pathAndName="../output/".$filename;
             $writer->save($pathAndName);
-            
+            $email = new PHPMailer(true);
             try {
-                $email = new PHPMailer(true);
-                //$email->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+                //$email->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
+                $email->SMTPDebug = SMTP::DEBUG_OFF;                      //Enable verbose debug output
                 $email->isSMTP();                                            //Send using SMTP
                 $email->Host       = SENDERSERVER;                     //Set the SMTP server to send through
                 $email->SMTPAuth   = true;                                   //Enable SMTP authentication
                 $email->Username   = SENDERUSERNAME;                     //SMTP username
                 $email->Password   = SENDERPASSWORD;                               //SMTP password
-                $email->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+                $email->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;            //Enable implicit TLS encryption
                 $email->Port       = SENDERPORT; 
                 $email->SetFrom(SENDEREMAIL, SENDERNAME); //Name is optional
-                $email->Subject   = 'Tamponi '.$filename;
+                $email->Subject   = 'Tamponi '.$usca;
                 $email->Body      = "In allegato i tamponi odierni.";
-                $email->AddAddress( 'piattaformeinformatiche.covid@asp.messina.it' );
+                $email->AddAddress( 'laboratori.covid@asp.messina.it' );
+                $email->AddBcc(BCCADDRESS);
                 $email->AddAttachment( $pathAndName , $filename );
-                $email->Send();
-                return true;
+                if (!$email->send()){
+                    $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
+                } else {
+                    $out = "Inviata";
+                }
             } catch(Exception $ex){
-                return $ex->ErrorInfo();
+                $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
             }
-            return true;
-
-           
+            return $out;
         }
 
         static function getUsca($val){
@@ -179,9 +183,11 @@
         }
 
         static function controllaSalva($sheet,$array,$label){
+            $out = "Non generato.";
             if ($array){
                 $sheet->getActiveSheet()->fromArray($array, null, 'A2');
-                Dividi::salva($sheet,$label);
+                $out = Dividi::salva($sheet,$label);
             }
+            return $out;
         }
     }
