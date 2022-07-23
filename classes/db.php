@@ -38,5 +38,70 @@
             }
             return $out;
         }
+
+        public static function getChiaviUsca(){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT chiave FROM `usca` WHERE is_active = 1";
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute();
+                    $res=$stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $out->data=[];
+                    foreach($res as $chiave){
+                        array_push($out->data,$chiave['chiave']);
+                    }
+                    $out->status="OK";
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out;
+        }
+
+        public static function getUscaLabel($key){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT descrizione FROM `usca` WHERE chiave =:chiave";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
+                    $stmt->execute();
+                    $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                    $out->data=$res['descrizione'];
+                    $out->status="OK";
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out;
+        }
+
+        public static function getUscaMail($key){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT descrizione FROM `usca` WHERE chiave =:chiave";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
+                    $stmt->execute();
+                    $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                    $out->data=$res['descrizione'];
+                    $out->status="OK";
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out; 
+        }
     }
 ?>

@@ -12,6 +12,8 @@ function upload() {
     let xhr = new XMLHttpRequest();
     let url = "be/upload.php";
     var formData = new FormData();
+    formData.append("invia",$("#invia").prop("checked"));
+    formData.append("cancella",$("#cancella").prop("checked"));
     formData.append("file", f);
     xhr.open("POST", url, true);
     xhr.onreadystatechange = function () {

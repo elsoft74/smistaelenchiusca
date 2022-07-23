@@ -9,7 +9,10 @@
     try{
         $fileName = $_FILES["file"]["name"]; 
         $fileTmpLoc = $_FILES["file"]["tmp_name"];
-        $out=Dividi::elabora($fileTmpLoc);
+        $invia=array_key_exists("invia",$_POST)?$_POST["invia"]=="true":false;
+        $cancella=array_key_exists("cancella",$_POST)?$_POST["cancella"]=="true":false;
+        //var_dump($_POST);
+        $out=Dividi::elabora($fileTmpLoc,$invia,$cancella);
         //$out->status="OK";
     } catch(Exception $ex){
         $out->error=$ex->getMessage();

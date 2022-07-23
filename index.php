@@ -38,6 +38,12 @@
                 <input class="form-control" name="file" type="file" id="formFile" accept=".xls, .xlsx">
             </div>
             <div class="mb-3">
+                <label for="invia" class="form-check-label">Invia ad usca via e-mail</label>
+                <input class="form-check-input" name="invia" type="checkbox" id="invia">
+                <label for="cancella" class="form-check-label" id="cancellaLabel">Cancella dopo l'invio dell'e-mail</label>
+                <input class="form-check-input" name="cancella" type="checkbox" id="cancella">
+            </div>
+            <div class="mb-3">
                 <input class="button form-control" type="submit" id="submitbutton" onclick="upload()">
             </div>
         </form>

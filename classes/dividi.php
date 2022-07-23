@@ -9,114 +9,83 @@
     use PHPMailer\PHPMailer\SMTP;
     
     Class Dividi{
-        static function elabora($fileTmpLoc){
-            //echo("elabora");
-            //echo($fileTmpLoc);
+        static function elabora($fileTmpLoc,$invia,$cancella){
             $out = new StdClass();
             $out->status = "KO";
             $out->data = new StdClass();
-            if(null!=$fileTmpLoc){
-                $barcellona = Dividi::inizializza();
-                $barcellonaArr = [];
-                $lipari = Dividi::inizializza();
-                $lipariArr = [];
-                $messina = Dividi::inizializza();
-                $messinaArr = [];
-                $milazzo = Dividi::inizializza();
-                $milazzoArr = [];
-                $milazzoBarcellona = Dividi::inizializza();
-                $milazzoBarcellonaArr = [];
-                $mistretta = Dividi::inizializza();
-                $mistrettaArr = [];
-                $patti = Dividi::inizializza();
-                $pattiArr = [];
-                $roccalumera = Dividi::inizializza();
-                $roccalumeraArr = [];
-                $santagata = Dividi::inizializza();
-                $santagataArr = [];
-                $saponara = Dividi::inizializza();
-                $saponaraArr = [];
-                $taormina = Dividi::inizializza();
-                $taorminaArr = [];
-                
-                $altri = Dividi::inizializza();
-                $altriArr = [];
+            try {
+                if(null!=$fileTmpLoc){
+                    $spreadsheets = [];
+                    
+                    $tmpObj = new StdClass();
+                    $tmpObj->spread = Dividi::inizializza();
+                    $tmpObj->spreadArray = [];
+                    $spreadsheets['ALTRI']=$tmpObj;
+                    $keys=[];
+                    
+                    $tmpObj = DB::getChiaviUsca();
+                    if($tmpObj->status=="OK"){
+                        $keys=$tmpObj->data;
+                    } else {
+                        throw new Exception("Impossibile recuperare le chiavi USCA");
+                    }
+                    
+                    foreach ($keys as $key){
+                        $tmpObj = new StdClass();
+                        $tmpObj->spread = Dividi::inizializza();
+                        $tmpObj->spreadArray = [];
+                        $spreadsheets[$key]=$tmpObj;
+                    }
 
-                $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($fileTmpLoc);
-                $reader->setReadDataOnly(true);
-                $spreadsheet = $reader->load($fileTmpLoc);
-                $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-                array_shift($sheetData);
-                foreach ($sheetData as $row){
-                    //var_dump($row);
-                    if('Tampone a 7 giorni'==$row['J']){
-                        if(!is_string($row['I'])){
-                            $row['J']=7+$row['I'];
+                    $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($fileTmpLoc);
+                    $reader->setReadDataOnly(true);
+                    $spreadsheet = $reader->load($fileTmpLoc);
+                    $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+                    array_shift($sheetData);
+                    foreach ($sheetData as $row){
+                        //var_dump($row);
+                        if('Tampone a 7 giorni'==$row['J']){
+                            if(!is_string($row['I'])){
+                                $row['J']=7+$row['I'];
+                            } else {
+                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P7D')))->format("d/m/Y");
+                            }
+                        }
+                        if('Tampone a 10 giorni'==$row['J']){
+                            if(!is_string($row['I'])){
+                                $row['J']=10+$row['I'];
+                            } else {
+                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P10D')))->format("d/m/Y");
+                            }
+                        }
+                        $dom = Dividi::getUsca($row['G']);
+                        if (array_key_exists($dom,$spreadsheets)){
+                            array_push($spreadsheets[$dom]->spreadArray,$row);
                         } else {
-                            $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P7D')))->format("d/m/Y");
+                            array_push($spreadsheets['ALTRI']->spreadArray,$row); 
                         }
                     }
-                    if('Tampone a 10 giorni'==$row['J']){
-                        if(!is_string($row['I'])){
-                            $row['J']=10+$row['I'];
+    
+                    $out->data=[];
+                    foreach ($keys as $key){
+                        $label = DB::getUscaLabel($key);
+                        if ($label->status=="OK"){
+                            $out->data[$key]=Dividi::controllaSalva($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$label->data,$invia,$cancella);
                         } else {
-                            $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P10D')))->format("d/m/Y");
+                            throw new Exception("Errore durante il recuper dell'etichetta per:".$key);
                         }
                     }
-                    $dom = Dividi::getUsca($row['G']);
-                    switch($dom){
-                        case ('BARCELLONA'):
-                            array_push($barcellonaArr,$row);
-                            break;
-                        case ('LIPARI'):
-                            array_push($lipariArr,$row);
-                            break;
-                        case ('MESSINA'):
-                            array_push($messinaArr,$row);
-                            break;
-                        case ('MILAZZO'):
-                            array_push($milazzoArr,$row);
-                            break;
-                        case ('MILAZZOBARCELLONA'):
-                            array_push($milazzoBarcellonaArr,$row);
-                            break;
-                        case ('MISTRETTA'):
-                            array_push($mistrettaArr,$row);
-                            break;
-                        case ('PATTI'):
-                            array_push($pattiArr,$row);
-                            break;
-                        case ('ROCCALUMERA'):
-                            array_push($roccalumeraArr,$row);
-                            break;
-                        case ('SANTAGATA'):
-                            array_push($santagataArr,$row);
-                            break;
-                        case ('SAPONARA'):
-                            array_push($saponaraArr,$row);
-                            break;
-                        case ('TAORMINA'):
-                            array_push($taorminaArr,$row);
-                            break;
-                        default:
-                            array_push($altriArr,$row);
-                    }
+                    $out->data[$key]=Dividi::controllaSalva($spreadsheets["ALTRI"]->spread,$spreadsheets["ALTRI"]->spreadArray,"Altri",$invia,$cancella);
+    
+                    $out->status="OK";
+                } else {
+                    throw new Exception("Impossibile leggere il file");
                 }
 
-                $out->data->barcellona=Dividi::controllaSalva($barcellona,$barcellonaArr,"Barcellona");
-                $out->data->lipari=Dividi::controllaSalva($lipari,$lipariArr,"Lipari");
-                $out->data->messina=Dividi::controllaSalva($messina,$messinaArr,"Messina");
-                $out->data->milazzo=Dividi::controllaSalva($milazzo,$milazzoArr,"Milazzo");
-                $out->data->milazzobarcellona=Dividi::controllaSalva($milazzoBarcellona,$milazzoBarcellonaArr,"MilazzoBarcellona");
-                $out->data->mistretta=Dividi::controllaSalva($mistretta,$mistrettaArr,"Mistretta");
-                $out->data->patti=Dividi::controllaSalva($patti,$pattiArr,"Patti");
-                $out->data->roccalumera=Dividi::controllaSalva($roccalumera,$roccalumeraArr,"Roccalumera");
-                $out->data->santagata=Dividi::controllaSalva($santagata,$santagataArr,"SantAgata");
-                $out->data->saponara=Dividi::controllaSalva($saponara,$saponaraArr,"Saponara");
-                $out->data->taormina=Dividi::controllaSalva($taormina,$taorminaArr,"Taormina");
-                $out->data->altri=Dividi::controllaSalva($altri,$altriArr,"Altri");
-                $out->status="OK";
+            } catch (Exception $ex){
+                $out->error = $ex->getMessage();
             }
+            
             return $out;   
         }
 
@@ -138,42 +107,54 @@
             return $spreadsheet;
         }
 
-        static function salva($file,$usca){
-            $out = null;
+        static function salva($file,$usca,$invia,$cancella){
+            $out = "Non inviata";
             date_default_timezone_set("Etc/UTC");
             $now=new DateTime();
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('J:J')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+            $file->getActiveSheet()->freezePane('A2');
+            $file->getActiveSheet()->getStyle("A:L")->getFont()->setSize(11);
+            foreach(range('A','L') as $columnID) {
+                $file->getActiveSheet()->getColumnDimension($columnID)
+                    ->setAutoSize(true);
+            }
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);
             $filename = $now->format("YmdHi")."_".$usca.".xlsx";
             $pathAndName="../output/".$filename;
             $writer->save($pathAndName);
             $email = new PHPMailer(true);
-            try {
-                //$email->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
-                $email->SMTPDebug = SMTP::DEBUG_OFF;                      //Enable verbose debug output
-                $email->isSMTP();                                            //Send using SMTP
-                $email->Host       = SENDERSERVER;                     //Set the SMTP server to send through
-                $email->SMTPAuth   = true;                                   //Enable SMTP authentication
-                $email->Username   = SENDERUSERNAME;                     //SMTP username
-                $email->Password   = SENDERPASSWORD;                               //SMTP password
-                $email->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;            //Enable implicit TLS encryption
-                $email->Port       = SENDERPORT; 
-                $email->SetFrom(SENDEREMAIL, SENDERNAME); //Name is optional
-                $email->Subject   = 'Tamponi '.$usca;
-                $email->Body      = "In allegato i tamponi odierni.";
-                $email->AddAddress( 'laboratori.covid@asp.messina.it' );
-                $email->AddBcc(BCCADDRESS);
-                $email->AddAttachment( $pathAndName , $filename );
-                if (!$email->send()){
+            if($invia){
+                try {
+                    //$email->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
+                    $email->SMTPDebug = SMTP::DEBUG_OFF;                      //Enable verbose debug output
+                    $email->isSMTP();                                            //Send using SMTP
+                    $email->Host       = SENDERSERVER;                     //Set the SMTP server to send through
+                    $email->SMTPAuth   = true;                                   //Enable SMTP authentication
+                    $email->Username   = SENDERUSERNAME;                     //SMTP username
+                    $email->Password   = SENDERPASSWORD;                               //SMTP password
+                    $email->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;            //Enable implicit TLS encryption
+                    $email->Port       = SENDERPORT; 
+                    $email->SetFrom(SENDEREMAIL, SENDERNAME); //Name is optional
+                    $email->Subject   = 'Tamponi '.$usca;
+                    $email->Body      = "In allegato i tamponi odierni.";
+                    $email->AddAddress( 'laboratori.covid@asp.messina.it' );
+                    $email->AddBcc(BCCADDRESS);
+                    $email->AddAttachment( $pathAndName , $filename );
+                    if (!$email->send()){
+                        $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
+                    } else {
+                        $out = "Inviata";
+                        if($cancella){
+                            shell_exec("rm -f ".$pathAndName);
+                        }
+                    }
+                } catch(Exception $ex){
                     $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
-                } else {
-                    $out = "Inviata";
                 }
-            } catch(Exception $ex){
-                $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
             }
+            
             return $out;
         }
 
@@ -182,11 +163,11 @@
             return $out;
         }
 
-        static function controllaSalva($sheet,$array,$label){
+        static function controllaSalva($sheet,$array,$label,$invia,$cancella){
             $out = "Non generato.";
             if ($array){
                 $sheet->getActiveSheet()->fromArray($array, null, 'A2');
-                $out = Dividi::salva($sheet,$label);
+                $out = Dividi::salva($sheet,$label,$invia,$cancella);
             }
             return $out;
         }
