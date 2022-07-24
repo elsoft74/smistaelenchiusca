@@ -28,9 +28,12 @@
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':localita',$localita,PDO::PARAM_STR);
                     $stmt->execute();
-                    $res=$stmt->fetch(PDO::FETCH_ASSOC);
-                    //var_dump($res);
-                    $out->data=($res)?$res['chiave']:"";
+                    if($stmt->rowCount()>1){
+                        $out->data="";
+                    } else {
+                        $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                        $out->data=($res)?$res['chiave']:"";
+                    }
                     $out->status="OK";
                 } catch(Exception $ex){
                         $out->error=$ex->getMessage();
@@ -69,13 +72,16 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT descrizione FROM `usca` WHERE chiave =:chiave";
+                    $query = "SELECT descrizione FROM `usca` WHERE chiave =UPPER(:chiave)";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
                     $res=$stmt->fetch(PDO::FETCH_ASSOC);
-                    $out->data=$res['descrizione'];
-                    $out->status="OK";
+                    $descrizione=($res)?$res['descrizione']:"";
+                    if($descrizione!=""){
+                        $out->data=$descrizione;
+                        $out->status="OK";
+                    }
                 } catch(Exception $ex){
                         $out->error=$ex->getMessage();
                     }
@@ -90,13 +96,16 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT descrizione FROM `usca` WHERE chiave =:chiave";
+                    $query = "SELECT email FROM `usca` WHERE chiave =UPPER(:chiave)";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
                     $res=$stmt->fetch(PDO::FETCH_ASSOC);
-                    $out->data=$res['descrizione'];
-                    $out->status="OK";
+                    $email=($res)?$res['email']:"";
+                    if($email!=""){
+                        $out->data=$email;
+                        $out->status="OK";
+                    }
                 } catch(Exception $ex){
                         $out->error=$ex->getMessage();
                     }

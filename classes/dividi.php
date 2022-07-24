@@ -13,6 +13,7 @@
             $out = new StdClass();
             $out->status = "KO";
             $out->data = new StdClass();
+            $stringtoremove=array(" ","(ME)","'","-");
             try {
                 if(null!=$fileTmpLoc){
                     $spreadsheets = [];
@@ -43,7 +44,6 @@
                     $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
                     array_shift($sheetData);
                     foreach ($sheetData as $row){
-                        //var_dump($row);
                         if('Tampone a 7 giorni'==$row['J']){
                             if(!is_string($row['I'])){
                                 $row['J']=7+$row['I'];
@@ -58,7 +58,8 @@
                                 $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P10D')))->format("d/m/Y");
                             }
                         }
-                        $dom = Dividi::getUsca($row['G']);
+                        //$dom = Dividi::getUsca($row['G']);
+                        $dom = Dividi::getUsca(str_replace($stringtoremove,"",$row['G']));
                         if (array_key_exists($dom,$spreadsheets)){
                             array_push($spreadsheets[$dom]->spreadArray,$row);
                         } else {
@@ -70,7 +71,7 @@
                     foreach ($keys as $key){
                         $label = DB::getUscaLabel($key);
                         if ($label->status=="OK"){
-                            $out->data[$key]=Dividi::controllaSalva($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$label->data,$invia,$cancella);
+                            $out->data[$key]=Dividi::controllaSalva($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$key,$invia,$cancella);
                         } else {
                             throw new Exception("Errore durante il recuper dell'etichetta per:".$key);
                         }
@@ -107,10 +108,20 @@
             return $spreadsheet;
         }
 
-        static function salva($file,$usca,$invia,$cancella){
+        static function salva($file,$key,$invia,$cancella){
             $out = "Non inviata";
             date_default_timezone_set("Etc/UTC");
             $now=new DateTime();
+            $label = DB::getUscaLabel($key);
+            $uscaaddress=DB::getUscaMail($key);
+                    
+            if($uscaaddress->status!="OK"){
+                throw new Exception("Errore nel recupero e-mail USCA ".$key);
+            }
+            if($label->status!="OK"){
+                throw new Exception("Errore nel recupero etichetta USCA ".$key);
+            }
+            
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('J:J')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
@@ -120,8 +131,13 @@
                 $file->getActiveSheet()->getColumnDimension($columnID)
                     ->setAutoSize(true);
             }
+            $file->getActiveSheet()->setAutoFilter(
+                $file->getActiveSheet()
+                    ->calculateWorksheetDimension()
+            );
+            $file->getActiveSheet()->getAutoFilter()->setRangeToMaxRow();
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);
-            $filename = $now->format("YmdHi")."_".$usca.".xlsx";
+            $filename = $now->format("YmdHi")."_".$label->data.".xlsx";
             $pathAndName="../output/".$filename;
             $writer->save($pathAndName);
             $email = new PHPMailer(true);
@@ -137,14 +153,16 @@
                     $email->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;            //Enable implicit TLS encryption
                     $email->Port       = SENDERPORT; 
                     $email->SetFrom(SENDEREMAIL, SENDERNAME); //Name is optional
-                    $email->Subject   = 'Tamponi '.$usca;
+                    $email->Subject   = 'Tamponi '.$label->data;
                     $email->Body      = "In allegato i tamponi odierni.";
-                    $email->AddAddress( 'laboratori.covid@asp.messina.it' );
+                    $email->AddAddress( $uscaaddress->data);
                     $email->AddBcc(BCCADDRESS);
                     $email->AddAttachment( $pathAndName , $filename );
                     if (!$email->send()){
                         $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
                     } else {
+                        //$mail_string = $email->getSentMIMEMessage();
+                        //imap_append($ImapStream, $folder, $mail_string, "\\Seen");
                         $out = "Inviata";
                         if($cancella){
                             shell_exec("rm -f ".$pathAndName);
@@ -163,11 +181,11 @@
             return $out;
         }
 
-        static function controllaSalva($sheet,$array,$label,$invia,$cancella){
+        static function controllaSalva($sheet,$array,$key,$invia,$cancella){
             $out = "Non generato.";
             if ($array){
                 $sheet->getActiveSheet()->fromArray($array, null, 'A2');
-                $out = Dividi::salva($sheet,$label,$invia,$cancella);
+                $out = Dividi::salva($sheet,$key,$invia,$cancella);
             }
             return $out;
         }
