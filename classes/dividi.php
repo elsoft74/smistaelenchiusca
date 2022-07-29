@@ -50,8 +50,7 @@
                             } else {
                                 $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P7D')))->format("d/m/Y");
                             }
-                        }
-                        if('Tampone a 10 giorni'==$row['J']){
+                        } else {
                             if(!is_string($row['I'])){
                                 $row['J']=10+$row['I'];
                             } else {
@@ -137,7 +136,7 @@
             );
             $file->getActiveSheet()->getAutoFilter()->setRangeToMaxRow();
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);
-            $filename = $now->format("YmdHi")."_".$label->data.".xlsx";
+            $filename = $label->data."_".$now->format("d-m_Hi")."_".".xlsx";
             $pathAndName="../output/".$filename;
             $writer->save($pathAndName);
             $email = new PHPMailer(true);
