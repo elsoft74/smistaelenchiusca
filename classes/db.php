@@ -112,5 +112,53 @@
             }
             return $out; 
         }
+
+        public static function isForNewPositive($key){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT for_new_positive FROM `usca` WHERE chiave =UPPER(:chiave)";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
+                    $stmt->execute();
+                    $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                    $for_new_positive=($res)?$res['for_new_positive']:"";
+                    if($for_new_positive!=""){
+                        $out->data=$for_new_positive=="1";
+                        $out->status="OK";
+                    }
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out; 
+        }
+
+        public static function isFullData($key){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT full_data FROM `usca` WHERE chiave =UPPER(:chiave)";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
+                    $stmt->execute();
+                    $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                    $full_data=($res)?$res['full_data']:"";
+                    if($full_data!=""){
+                        $out->data=$full_data=="1";
+                        $out->status="OK";
+                    }
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out; 
+        }
     }
 ?>

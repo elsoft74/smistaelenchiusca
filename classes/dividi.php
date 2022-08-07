@@ -18,10 +18,10 @@
                 if(null!=$fileTmpLoc){
                     $spreadsheets = [];
                     
-                    $tmpObj = new StdClass();
-                    $tmpObj->spread = Dividi::inizializza();
-                    $tmpObj->spreadArray = [];
-                    $spreadsheets['ALTRI']=$tmpObj;
+                    // $tmpObj = new StdClass();
+                    // $tmpObj->spread = Dividi::inizializza();
+                    // $tmpObj->spreadArray = [];
+                    // $spreadsheets['ALTRI']=$tmpObj;
                     $keys=[];
                     
                     $tmpObj = DB::getChiaviUsca();
@@ -30,6 +30,15 @@
                     } else {
                         throw new Exception("Impossibile recuperare le chiavi USCA");
                     }
+
+                    // $tmpObj = new StdClass();
+                    // $tmpObj->spread = Dividi::inizializza();
+                    // $tmpObj->spreadArray = [];
+                    // $spreadsheets['NUOVI']=$tmpObj;
+                    // $tmpObj = new StdClass();
+                    // $tmpObj->spread = Dividi::inizializza();
+                    // $tmpObj->spreadArray = [];
+                    // $spreadsheets['ALTRI']=$tmpObj;
                     
                     foreach ($keys as $key){
                         $tmpObj = new StdClass();
@@ -44,7 +53,7 @@
                     $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
                     array_shift($sheetData);
                     foreach ($sheetData as $row){
-                        if('Tampone a 7 giorni'==$row['J']){
+                        if(strpos(7,$row['J']) !==false){
                             if(!is_string($row['I'])){
                                 $row['J']=7+$row['I'];
                             } else {
@@ -57,10 +66,12 @@
                                 $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P10D')))->format("d/m/Y");
                             }
                         }
-                        //$dom = Dividi::getUsca($row['G']);
                         $dom = Dividi::getUsca(str_replace($stringtoremove,"",$row['G']));
                         if (array_key_exists($dom,$spreadsheets)){
                             array_push($spreadsheets[$dom]->spreadArray,$row);
+                            if(Dividi::isForNewPositive($dom)){
+                                array_push($spreadsheets['NUOVI']->spreadArray,$row);
+                            }
                         } else {
                             array_push($spreadsheets['ALTRI']->spreadArray,$row); 
                         }
@@ -72,7 +83,7 @@
                         if ($label->status=="OK"){
                             $out->data[$key]=Dividi::controllaSalva($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$key,$invia,$cancella);
                         } else {
-                            throw new Exception("Errore durante il recuper dell'etichetta per:".$key);
+                            throw new Exception("Errore durante il recupero dell'etichetta per:".$key);
                         }
                     }
                     $out->data[$key]=Dividi::controllaSalva($spreadsheets["ALTRI"]->spread,$spreadsheets["ALTRI"]->spreadArray,"Altri",$invia,$cancella);
@@ -102,8 +113,9 @@
                 ->setCellValue('H1', 'INDIRIZZO DOMICILIO')
                 ->setCellValue('I1', 'DATA TAMPONE')
                 ->setCellValue('J1', 'Giorno Tampone')
-                ->setCellValue('K1', 'Vax cell')
-                ->setCellValue('L1', 'Vax mail');
+                ->setCellValue('K1', 'Dosi')
+                ->setCellValue('L1', 'Vax cell')
+                ->setCellValue('M1', 'Vax mail');
             return $spreadsheet;
         }
 
@@ -120,13 +132,19 @@
             if($label->status!="OK"){
                 throw new Exception("Errore nel recupero etichetta USCA ".$key);
             }
+
+
+            $isFullData=Dividi::isFullData($key);
+            if(!$isFullData){
+                $file->getActiveSheet()->removeColumn("K",3);
+            }
             
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('J:J')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->freezePane('A2');
-            $file->getActiveSheet()->getStyle("A:L")->getFont()->setSize(11);
-            foreach(range('A','L') as $columnID) {
+            $file->getActiveSheet()->getStyle("A:M")->getFont()->setSize(11);
+            foreach(range('A',$isFullData?'M':'J') as $columnID) {
                 $file->getActiveSheet()->getColumnDimension($columnID)
                     ->setAutoSize(true);
             }
@@ -177,6 +195,17 @@
 
         static function getUsca($val){
             $out = (DB::getUscaFromLocalita($val))->data;
+            return $out;
+        }
+
+        static function isForNewPositive($val){
+            $out = (DB::isForNewPositive($val))->data;
+            return $out;
+        }
+
+
+        static function isFullData($val){
+            $out = (DB::isFullData($val))->data;
             return $out;
         }
 
