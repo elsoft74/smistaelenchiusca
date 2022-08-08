@@ -53,7 +53,7 @@
                     $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
                     array_shift($sheetData);
                     foreach ($sheetData as $row){
-                        if(strpos(7,$row['J']) !==false){
+                        if(strpos($row['J'],"7") !==false){
                             if(!is_string($row['I'])){
                                 $row['J']=7+$row['I'];
                             } else {
