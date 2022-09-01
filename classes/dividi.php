@@ -53,19 +53,25 @@
                     $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
                     array_shift($sheetData);
                     foreach ($sheetData as $row){
+                        /*
                         if(strpos($row['J'],"7") !==false){
                             if(!is_string($row['I'])){
-                                $row['J']=7+$row['I'];
+                                $row['J']=5+$row['I'];
                             } else {
-                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P7D')))->format("d/m/Y");
+                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P5D')))->format("d/m/Y");
                             }
                         } else {
                             if(!is_string($row['I'])){
-                                $row['J']=10+$row['I'];
+                                $row['J']=5+$row['I'];
                             } else {
-                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P10D')))->format("d/m/Y");
+                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P5D')))->format("d/m/Y");
                             }
-                        }
+                        }*/
+                        if(!is_string($row['I'])){
+                                $row['J']=5+$row['I'];
+                            } else {
+                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P5D')))->format("d/m/Y");
+                            }
                         $dom = Dividi::getUsca(str_replace($stringtoremove,"",$row['G']));
                         if (array_key_exists($dom,$spreadsheets)){
                             array_push($spreadsheets[$dom]->spreadArray,$row);
