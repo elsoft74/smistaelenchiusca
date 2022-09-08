@@ -75,6 +75,7 @@
                         $dom = Dividi::getUsca(str_replace($stringtoremove,"",$row['G']));
                         $row=Dividi::SlittaColonne($row);
                         $row=Dividi::calcolaFascia($row);
+                        // $row=Dividi::controllaContatti($row);
                         if (array_key_exists($dom,$spreadsheets)){
                             array_push($spreadsheets[$dom]->spreadArray,$row);
                             if(Dividi::isForNewPositive($dom)){
@@ -117,13 +118,13 @@
                 ->setCellValue('D1', 'CODICE FISCALE')
                 ->setCellValue('E1', 'DATA NASCITA')
                 ->setCellValue('F1', 'FASCIA ETA\'')
-                ->setCellValue('G1', 'CELLULARE')
+                ->setCellValue('G1', 'TELEFONO')
                 ->setCellValue('H1', 'DOMICILIO')
                 ->setCellValue('I1', 'INDIRIZZO DOMICILIO')
                 ->setCellValue('J1', 'DATA TAMPONE')
                 ->setCellValue('K1', 'Giorno Tampone')
                 ->setCellValue('L1', 'Dosi')
-                ->setCellValue('M1', 'Vax cell')
+                ->setCellValue('M1', 'ALTRO CONTATTO')
                 ->setCellValue('N1', 'Vax mail');
             return $spreadsheet;
         }
@@ -145,7 +146,8 @@
 
             $isFullData=Dividi::isFullData($key);
             if(!$isFullData){
-                $file->getActiveSheet()->removeColumn("K",3);
+                $file->getActiveSheet()->removeColumn("N");
+                $file->getActiveSheet()->removeColumn("L");
             }
             
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
@@ -259,4 +261,9 @@
             
             return $row;
         }
+
+        // static function controllaContatti($row){
+        //     $row['M']=(strpos($row['G'],$row['M'])===false)?$row['M']:"";
+        //     return $row;
+        // }
     }
