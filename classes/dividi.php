@@ -73,6 +73,8 @@
                                 $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P5D')))->format("d/m/Y");
                             }
                         $dom = Dividi::getUsca(str_replace($stringtoremove,"",$row['G']));
+                        $row=Dividi::SlittaColonne($row);
+                        $row=Dividi::calcolaFascia($row);
                         if (array_key_exists($dom,$spreadsheets)){
                             array_push($spreadsheets[$dom]->spreadArray,$row);
                             if(Dividi::isForNewPositive($dom)){
@@ -114,14 +116,15 @@
                 ->setCellValue('C1', 'NOME')
                 ->setCellValue('D1', 'CODICE FISCALE')
                 ->setCellValue('E1', 'DATA NASCITA')
-                ->setCellValue('F1', 'CELLULARE')
-                ->setCellValue('G1', 'DOMICILIO')
-                ->setCellValue('H1', 'INDIRIZZO DOMICILIO')
-                ->setCellValue('I1', 'DATA TAMPONE')
-                ->setCellValue('J1', 'Giorno Tampone')
-                ->setCellValue('K1', 'Dosi')
-                ->setCellValue('L1', 'Vax cell')
-                ->setCellValue('M1', 'Vax mail');
+                ->setCellValue('F1', 'FASCIA ETA\'')
+                ->setCellValue('G1', 'CELLULARE')
+                ->setCellValue('H1', 'DOMICILIO')
+                ->setCellValue('I1', 'INDIRIZZO DOMICILIO')
+                ->setCellValue('J1', 'DATA TAMPONE')
+                ->setCellValue('K1', 'Giorno Tampone')
+                ->setCellValue('L1', 'Dosi')
+                ->setCellValue('M1', 'Vax cell')
+                ->setCellValue('N1', 'Vax mail');
             return $spreadsheet;
         }
 
@@ -146,10 +149,10 @@
             }
             
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
-            $file->getActiveSheet()->getStyle('I:I')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('J:J')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+            $file->getActiveSheet()->getStyle('K:K')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->freezePane('A2');
-            $file->getActiveSheet()->getStyle("A:M")->getFont()->setSize(11);
+            $file->getActiveSheet()->getStyle("A:N")->getFont()->setSize(11);
             foreach(range('A',$isFullData?'M':'J') as $columnID) {
                 $file->getActiveSheet()->getColumnDimension($columnID)
                     ->setAutoSize(true);
@@ -222,5 +225,38 @@
                 $out = Dividi::salva($sheet,$key,$invia,$cancella);
             }
             return $out;
+        }
+
+        static function SlittaColonne($row){
+            $out = [];
+            $out['A']=$row['A'];
+            $out['B']=$row['B'];
+            $out['C']=$row['C'];
+            $out['D']=$row['D'];
+            $out['E']=$row['E'];
+            $out['F']='';
+            $out['G']=$row['F'];
+            $out['H']=$row['G'];
+            $out['I']=$row['H'];
+            $out['J']=$row['I'];
+            $out['K']=$row['J'];
+            $out['L']=$row['K'];
+            $out['M']=$row['L'];
+            $out['N']=$row['M'];
+            return $out;
+        }
+
+        static function calcolaFascia($row){
+            $today=new DateTime();
+            $nascita=new DateTime(str_replace("/","-",$row['E']));
+            $diff=$today->diff($nascita);
+            $row['F']=$diff->format('%Y');
+            if($diff->format('%Y')>=60){
+                $row['F']="OLTRE 60";
+            } else {
+                $row['F']="SOTTO 60";
+            }
+            
+            return $row;
         }
     }
