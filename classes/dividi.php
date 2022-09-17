@@ -125,7 +125,7 @@
                 ->setCellValue('K1', 'Giorno Tampone')
                 ->setCellValue('L1', 'Dosi')
                 ->setCellValue('M1', 'ALTRO CONTATTO')
-                ->setCellValue('N1', 'Vax mail');
+                ->setCellValue('N1', 'mail');
             return $spreadsheet;
         }
 
