@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 //     use PHPMailer\PHPMailer\IMAP;
     include_once("config/config.php");
 
-    $path = "{".SENDERSERVER.":".SENDERPORT."}"; // [INBOX]/Sent Mail
+    $path = "{".SENDERSERVER.":".SENDERPORT."/tls}"; // [INBOX]/Sent Mail
     $imapStream = imap_open($path, SENDERUSERNAME, SENDERPASSWORD);
     var_dump($imapStream);
     imap_close($imapStream);
