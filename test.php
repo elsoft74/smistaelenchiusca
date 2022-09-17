@@ -10,19 +10,19 @@ error_reporting(E_ALL);
 
     $path = "{".SENDERSERVER.":".SENDERPORT."}"; // [INBOX]/Sent Mail
     $imapStream = imap_open($path, SENDERUSERNAME, SENDERPASSWORD);
-    // var_dump($imapStream);
-    // imap_close($imapStream);
+    var_dump($imapStream);
+    imap_close($imapStream);
     
 
-    $folders = imap_listmailbox($imapStream, $path, "*");
+//     $folders = imap_listmailbox($imapStream, $path, "*");
 
-if ($folders == false) {
-    echo "Call failed<br />\n";
-} else {
-    foreach ($folders as $val) {
-        echo $val . "<br />\n";
-    }
-}
+// if ($folders == false) {
+//     echo "Call failed<br />\n";
+// } else {
+//     foreach ($folders as $val) {
+//         echo $val . "<br />\n";
+//     }
+// }
 
 // phpinfo();
 
