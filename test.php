@@ -1,17 +1,17 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 // use PHPMailer\PHPMailer\PHPMailer;
 //     use PHPMailer\PHPMailer\Exception;
 //     use PHPMailer\PHPMailer\SMTP;
 //     use PHPMailer\PHPMailer\IMAP;
-    include_once("config/config.php");
+    // include_once("config/config.php");
 
-    $path = "{".SENDERSERVER.":".SENDERPORT."/tls}"; // [INBOX]/Sent Mail
-    $imapStream = imap_open($path, SENDERUSERNAME, SENDERPASSWORD);
-    var_dump($imapStream);
-    imap_close($imapStream);
+    // $path = "{".SENDERSERVER.":".SENDERPORT."/tls}"; // [INBOX]/Sent Mail
+    // $imapStream = imap_open($path, SENDERUSERNAME, SENDERPASSWORD);
+    // var_dump($imapStream);
+    // imap_close($imapStream);
     
 
 //     $folders = imap_listmailbox($imapStream, $path, "*");
@@ -25,5 +25,6 @@ error_reporting(E_ALL);
 // }
 
 // phpinfo();
+echo("OK");
 
 ?>
