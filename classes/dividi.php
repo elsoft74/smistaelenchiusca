@@ -67,12 +67,12 @@
                                 $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P5D')))->format("d/m/Y");
                             }
                         }*/
-                        if(!is_string($row['I'])){
-                                $row['J']=5+$row['I'];
+                        if(!is_string($row['J'])){
+                                $row['K']=5+$row['J'];
                             } else {
-                                $row['J']=((DateTime::createFromFormat("d/m/Y",$row['I']))->add(new DateInterval('P5D')))->format("d/m/Y");
+                                $row['K']=((DateTime::createFromFormat("d/m/Y",$row['J']))->add(new DateInterval('P5D')))->format("d/m/Y");
                             }
-                        $dom = Dividi::getUsca(str_replace($stringtoremove,"",$row['G']));
+                        $dom = Dividi::getUsca(str_replace($stringtoremove,"",$row['H']));
                         $row=Dividi::SlittaColonne($row);
                         $row=Dividi::calcolaFascia($row);
                         // $row=Dividi::controllaContatti($row);
@@ -112,20 +112,20 @@
         static function inizializza(){
             $spreadsheet = new Spreadsheet();
             $spreadsheet->setActiveSheetIndex(0);
-            $spreadsheet->getActiveSheet()->setCellValue('A1', '')
+            $spreadsheet->getActiveSheet()->setCellValue('A1', '#')
                 ->setCellValue('B1', 'COGNOME')
                 ->setCellValue('C1', 'NOME')
                 ->setCellValue('D1', 'CODICE FISCALE')
                 ->setCellValue('E1', 'DATA NASCITA')
                 ->setCellValue('F1', 'FASCIA ETA\'')
-                ->setCellValue('G1', 'TELEFONO')
-                ->setCellValue('H1', 'DOMICILIO')
-                ->setCellValue('I1', 'INDIRIZZO DOMICILIO')
-                ->setCellValue('J1', 'DATA TAMPONE')
-                ->setCellValue('K1', 'Giorno Tampone')
-                ->setCellValue('L1', 'Dosi')
+                ->setCellValue('G1', 'TELEFONO1')
+                ->setCellValue('H1', 'TELEFONO2')
+                ->setCellValue('I1', 'DOMICILIO')
+                ->setCellValue('J1', 'INDIRIZZO DOMICILIO')
+                ->setCellValue('K1', 'DATA TAMPONE')
+                ->setCellValue('L1', 'GIORNO TAMPONE')
                 ->setCellValue('M1', 'ALTRO CONTATTO')
-                ->setCellValue('N1', 'mail');
+                ->setCellValue('N1', 'MAIL');
             return $spreadsheet;
         }
 
@@ -147,12 +147,12 @@
             $isFullData=Dividi::isFullData($key);
             if(!$isFullData){
                 $file->getActiveSheet()->removeColumn("N");
-                $file->getActiveSheet()->removeColumn("L");
+                $file->getActiveSheet()->removeColumn("M");
             }
             
             $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
-            $file->getActiveSheet()->getStyle('J:J')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->getStyle('K:K')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+            $file->getActiveSheet()->getStyle('L:L')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
             $file->getActiveSheet()->freezePane('A2');
             $file->getActiveSheet()->getStyle("A:N")->getFont()->setSize(11);
             foreach(range('A',$isFullData?'M':'J') as $columnID) {
