@@ -120,7 +120,7 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT descrizione FROM `usca` WHERE chiave =UPPER(:chiave)";
+                    $query = "SELECT descrizione FROM `usca` WHERE chiave =UPPER(:chiave) AND is_active=1";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
@@ -144,7 +144,7 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT descrizione FROM `drive_in` WHERE chiave =UPPER(:chiave)";
+                    $query = "SELECT descrizione FROM `drive_in` WHERE chiave =UPPER(:chiave) AND is_active=1";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
@@ -168,7 +168,7 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT email FROM `usca` WHERE chiave =UPPER(:chiave)";
+                    $query = "SELECT email FROM `usca` WHERE chiave =UPPER(:chiave) AND is_active=1";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
@@ -192,7 +192,7 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT email FROM `drive_in` WHERE chiave =UPPER(:chiave)";
+                    $query = "SELECT email FROM `drive_in` WHERE chiave =UPPER(:chiave) AND is_active=1";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
@@ -216,7 +216,7 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT for_new_positive FROM `usca` WHERE chiave =UPPER(:chiave)";
+                    $query = "SELECT for_new_positive FROM `usca` WHERE chiave =UPPER(:chiave) AND is_active=1";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
@@ -240,7 +240,7 @@
             $conn = DB::conn();
             if ($conn != null){
                 try {
-                    $query = "SELECT full_data FROM `usca` WHERE chiave =UPPER(:chiave)";
+                    $query = "SELECT full_data FROM `usca` WHERE chiave =UPPER(:chiave) AND is_active=1";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();
