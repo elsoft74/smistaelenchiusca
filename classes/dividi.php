@@ -127,7 +127,7 @@
                         }
                     }
                     foreach ($keysD as $key){
-                        $label = DB::getUscaLabel($key);
+                        $label = DB::getDriveLabel($key);
                         if ($label->status=="OK"){
                             $out->data[$key]=Dividi::controllaSalvaD($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$key,$invia,$cancella);
                         } else {
@@ -247,16 +247,15 @@
             $out = "Non inviata";
             date_default_timezone_set("Etc/UTC");
             $now=new DateTime();
-            // $label = DB::getDriveLabel($key);
-            $label=$key;
+            $label = DB::getDriveLabel($key);
             $uscaaddress=DB::getDriveMail($key);
                     
             if($uscaaddress->status!="OK"){
                 throw new Exception("Errore nel recupero e-mail Drive-In ".$key);
             }
-            // if($label->status!="OK"){
-            //     throw new Exception("Errore nel recupero etichetta Drive-In ".$key);
-            // }
+            if($label->status!="OK"){
+                throw new Exception("Errore nel recupero etichetta Drive-In ".$key);
+            }
 
 
             $isFullData=Dividi::isFullData($key);
