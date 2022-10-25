@@ -176,10 +176,10 @@
             $uscaaddress=DB::getUscaMail($key);
                     
             if($uscaaddress->status!="OK"){
-                throw new Exception("Errore nel recupero e-mail USCA ".$key);
+                throw new Exception("Errore nel recupero e-mail UCA ".$key);
             }
             if($label->status!="OK"){
-                throw new Exception("Errore nel recupero etichetta USCA ".$key);
+                throw new Exception("Errore nel recupero etichetta UCA ".$key);
             }
 
 
@@ -247,15 +247,16 @@
             $out = "Non inviata";
             date_default_timezone_set("Etc/UTC");
             $now=new DateTime();
-            $label = DB::getDriveLabel($key);
+            // $label = DB::getDriveLabel($key);
+            $label=$key;
             $uscaaddress=DB::getDriveMail($key);
                     
             if($uscaaddress->status!="OK"){
                 throw new Exception("Errore nel recupero e-mail Drive-In ".$key);
             }
-            if($label->status!="OK"){
-                throw new Exception("Errore nel recupero etichetta Drive-In ".$key);
-            }
+            // if($label->status!="OK"){
+            //     throw new Exception("Errore nel recupero etichetta Drive-In ".$key);
+            // }
 
 
             $isFullData=Dividi::isFullData($key);
