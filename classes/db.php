@@ -42,6 +42,31 @@
             return $out;
         }
 
+        public static function getDriveFromLocalita($localita) {
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT chiave FROM `localita` JOIN `drive_in` ON `drive_in`.id=`localita`.`id_drive` WHERE `localita`.`nome` = UPPER(:localita)";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindParam(':localita',$localita,PDO::PARAM_STR);
+                    $stmt->execute();
+                    if($stmt->rowCount()>1){
+                        $out->data="";
+                    } else {
+                        $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                        $out->data=($res)?$res['chiave']:"";
+                    }
+                    $out->status="OK";
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out;
+        }
+
         public static function getChiaviUsca(){
             $out = new stdClass();
             $out->status="KO";
@@ -50,6 +75,29 @@
             if ($conn != null){
                 try {
                     $query = "SELECT chiave FROM `usca` WHERE is_active = 1";
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute();
+                    $res=$stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $out->data=[];
+                    foreach($res as $chiave){
+                        array_push($out->data,$chiave['chiave']);
+                    }
+                    $out->status="OK";
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out;
+        }
+
+        public static function getChiaviDrive(){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT chiave FROM `drive_in` WHERE is_active = 1";
                     $stmt = $conn->prepare($query);
                     $stmt->execute();
                     $res=$stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -89,6 +137,30 @@
             return $out;
         }
 
+        public static function getDriveLabel($key){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT descrizione FROM `drive_in` WHERE chiave =UPPER(:chiave)";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
+                    $stmt->execute();
+                    $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                    $descrizione=($res)?$res['descrizione']:"";
+                    if($descrizione!=""){
+                        $out->data=$descrizione;
+                        $out->status="OK";
+                    }
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out;
+        }
+
         public static function getUscaMail($key){
             $out = new stdClass();
             $out->status="KO";
@@ -97,6 +169,30 @@
             if ($conn != null){
                 try {
                     $query = "SELECT email FROM `usca` WHERE chiave =UPPER(:chiave)";
+                    $stmt = $conn->prepare($query);
+                    $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
+                    $stmt->execute();
+                    $res=$stmt->fetch(PDO::FETCH_ASSOC);
+                    $email=($res)?$res['email']:"";
+                    if($email!=""){
+                        $out->data=$email;
+                        $out->status="OK";
+                    }
+                } catch(Exception $ex){
+                        $out->error=$ex->getMessage();
+                    }
+            }
+            return $out; 
+        }
+
+        public static function getDriveMail($key){
+            $out = new stdClass();
+            $out->status="KO";
+            $out->data="";
+            $conn = DB::conn();
+            if ($conn != null){
+                try {
+                    $query = "SELECT email FROM `drive_in` WHERE chiave =UPPER(:chiave)";
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':chiave',$key,PDO::PARAM_STR);
                     $stmt->execute();

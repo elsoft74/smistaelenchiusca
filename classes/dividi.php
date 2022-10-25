@@ -23,12 +23,20 @@
                     // $tmpObj->spreadArray = [];
                     // $spreadsheets['ALTRI']=$tmpObj;
                     $keys=[];
+                    $keysD=[];
                     
                     $tmpObj = DB::getChiaviUsca();
                     if($tmpObj->status=="OK"){
                         $keys=$tmpObj->data;
                     } else {
-                        throw new Exception("Impossibile recuperare le chiavi USCA");
+                        throw new Exception("Impossibile recuperare le chiavi UCA");
+                    }
+
+                    $tmpObj = DB::getChiaviDrive();
+                    if($tmpObj->status=="OK"){
+                        $keysD=$tmpObj->data;
+                    } else {
+                        throw new Exception("Impossibile recuperare le chiavi DRIVE");
                     }
 
                     // $tmpObj = new StdClass();
@@ -41,6 +49,13 @@
                     // $spreadsheets['ALTRI']=$tmpObj;
                     
                     foreach ($keys as $key){
+                        $tmpObj = new StdClass();
+                        $tmpObj->spread = Dividi::inizializza();
+                        $tmpObj->spreadArray = [];
+                        $spreadsheets[$key]=$tmpObj;
+                    }
+
+                    foreach ($keysD as $key){
                         $tmpObj = new StdClass();
                         $tmpObj->spread = Dividi::inizializza();
                         $tmpObj->spreadArray = [];
@@ -78,11 +93,27 @@
                         // $row=Dividi::controllaContatti($row);
                         if (array_key_exists($dom,$spreadsheets)){
                             array_push($spreadsheets[$dom]->spreadArray,$row);
-                            if(Dividi::isForNewPositive($dom)){
-                                array_push($spreadsheets['NUOVI']->spreadArray,$row);
-                            }
+                            // if(Dividi::isForNewPositive($dom)){
+                            //     array_push($spreadsheets['NUOVI']->spreadArray,$row);
+                            // }
                         } else {
                             array_push($spreadsheets['ALTRI']->spreadArray,$row); 
+                        }
+                    }
+
+                    $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+                    array_shift($sheetData);
+                    foreach ($sheetData as $row){
+                        if(!is_string($row['J'])){
+                                $row['K']=5+$row['J'];
+                            } else {
+                                $row['K']=((DateTime::createFromFormat("d/m/Y",$row['J']))->add(new DateInterval('P5D')))->format("d/m/Y");
+                            }
+                        $dom = Dividi::getDrive(str_replace($stringtoremove,"",$row['H']));
+                        $row=Dividi::SlittaColonne($row);
+                        $row=Dividi::calcolaFascia($row);
+                        if (array_key_exists($dom,$spreadsheets)){
+                            array_push($spreadsheets[$dom]->spreadArray,$row);
                         }
                     }
     
@@ -90,12 +121,20 @@
                     foreach ($keys as $key){
                         $label = DB::getUscaLabel($key);
                         if ($label->status=="OK"){
-                            $out->data[$key]=Dividi::controllaSalva($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$key,$invia,$cancella);
+                            $out->data[$key]=Dividi::controllaSalvaU($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$key,$invia,$cancella);
                         } else {
                             throw new Exception("Errore durante il recupero dell'etichetta per:".$key);
                         }
                     }
-                    $out->data[$key]=Dividi::controllaSalva($spreadsheets["ALTRI"]->spread,$spreadsheets["ALTRI"]->spreadArray,"Altri",$invia,$cancella);
+                    foreach ($keysD as $key){
+                        $label = DB::getUscaLabel($key);
+                        if ($label->status=="OK"){
+                            $out->data[$key]=Dividi::controllaSalvaD($spreadsheets[$key]->spread,$spreadsheets[$key]->spreadArray,$key,$invia,$cancella);
+                        } else {
+                            throw new Exception("Errore durante il recupero dell'etichetta per:".$key);
+                        }
+                    }
+                    $out->data[$key]=Dividi::controllaSalvaU($spreadsheets["ALTRI"]->spread,$spreadsheets["ALTRI"]->spreadArray,"Altri",$invia,$cancella);
     
                     $out->status="OK";
                 } else {
@@ -129,7 +168,7 @@
             return $spreadsheet;
         }
 
-        static function salva($file,$key,$invia,$cancella){
+        static function salvaU($file,$key,$invia,$cancella){
             $out = "Non inviata";
             date_default_timezone_set("Etc/UTC");
             $now=new DateTime();
@@ -204,8 +243,88 @@
             return $out;
         }
 
+        static function salvaD($file,$key,$invia,$cancella){
+            $out = "Non inviata";
+            date_default_timezone_set("Etc/UTC");
+            $now=new DateTime();
+            $label = DB::getDriveLabel($key);
+            $uscaaddress=DB::getDriveMail($key);
+                    
+            if($uscaaddress->status!="OK"){
+                throw new Exception("Errore nel recupero e-mail Drive-In ".$key);
+            }
+            if($label->status!="OK"){
+                throw new Exception("Errore nel recupero etichetta Drive-In ".$key);
+            }
+
+
+            $isFullData=Dividi::isFullData($key);
+            if(!$isFullData){
+                $file->getActiveSheet()->removeColumn("N");
+                $file->getActiveSheet()->removeColumn("M");
+            }
+            
+            $file->getActiveSheet()->getStyle('E:E')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+            $file->getActiveSheet()->getStyle('K:K')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+            $file->getActiveSheet()->getStyle('L:L')->getNumberFormat()->setFormatCode('dd/mm/yyyy');
+            $file->getActiveSheet()->freezePane('A2');
+            $file->getActiveSheet()->getStyle("A:N")->getFont()->setSize(11);
+            foreach(range('A',$isFullData?'M':'J') as $columnID) {
+                $file->getActiveSheet()->getColumnDimension($columnID)
+                    ->setAutoSize(true);
+            }
+            $file->getActiveSheet()->setAutoFilter(
+                $file->getActiveSheet()
+                    ->calculateWorksheetDimension()
+            );
+            $file->getActiveSheet()->getAutoFilter()->setRangeToMaxRow();
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($file);
+            $filename = $label->data."_".$now->format("d-m_Hi")."_".".xlsx";
+            $pathAndName="../output/".$filename;
+            $writer->save($pathAndName);
+            $email = new PHPMailer(true);
+            if($invia){
+                try {
+                    //$email->SMTPDebug = SMTP::DEBUG_CONNECTION;                      //Enable verbose debug output
+                    $email->SMTPDebug = SMTP::DEBUG_OFF;                      //Enable verbose debug output
+                    $email->isSMTP();                                            //Send using SMTP
+                    $email->Host       = SENDERSERVER;                     //Set the SMTP server to send through
+                    $email->SMTPAuth   = true;                                   //Enable SMTP authentication
+                    $email->Username   = SENDERUSERNAME;                     //SMTP username
+                    $email->Password   = SENDERPASSWORD;                               //SMTP password
+                    $email->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;            //Enable implicit TLS encryption
+                    $email->Port       = SENDERPORT; 
+                    $email->SetFrom(SENDEREMAIL, SENDERNAME); //Name is optional
+                    $email->Subject   = 'Tamponi '.$label->data;
+                    $email->Body      = "In allegato i tamponi odierni.";
+                    $email->AddAddress( $uscaaddress->data);
+                    $email->AddBcc(BCCADDRESS);
+                    $email->AddAttachment( $pathAndName , $filename );
+                    if (!$email->send()){
+                        $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
+                    } else {
+                        //$mail_string = $email->getSentMIMEMessage();
+                        //imap_append($ImapStream, $folder, $mail_string, "\\Seen");
+                        $out = "Inviata";
+                        if($cancella){
+                            shell_exec("rm -f ".$pathAndName);
+                        }
+                    }
+                } catch(Exception $ex){
+                    $out = "Non inviata ".$email->ErrorInfo;//$ex->getMessage();
+                }
+            }
+            
+            return $out;
+        }
+
         static function getUsca($val){
             $out = (DB::getUscaFromLocalita($val))->data;
+            return $out;
+        }
+
+        static function getDrive($val){
+            $out = (DB::getDriveFromLocalita($val))->data;
             return $out;
         }
 
@@ -220,11 +339,20 @@
             return $out;
         }
 
-        static function controllaSalva($sheet,$array,$key,$invia,$cancella){
+        static function controllaSalvaU($sheet,$array,$key,$invia,$cancella){
             $out = "Non generato.";
             if ($array){
                 $sheet->getActiveSheet()->fromArray($array, null, 'A2');
-                $out = Dividi::salva($sheet,$key,$invia,$cancella);
+                $out = Dividi::salvaU($sheet,$key,$invia,$cancella);
+            }
+            return $out;
+        }
+
+        static function controllaSalvaD($sheet,$array,$key,$invia,$cancella){
+            $out = "Non generato.";
+            if ($array){
+                $sheet->getActiveSheet()->fromArray($array, null, 'A2');
+                $out = Dividi::salvaD($sheet,$key,$invia,$cancella);
             }
             return $out;
         }
