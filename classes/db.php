@@ -53,7 +53,7 @@
                     $stmt = $conn->prepare($query);
                     $stmt->bindParam(':localita',$localita,PDO::PARAM_STR);
                     $stmt->execute();
-                    if($stmt->rowCount()>1){
+                    if($stmt->rowCount()!=1){
                         $out->data="";
                     } else {
                         $res=$stmt->fetch(PDO::FETCH_ASSOC);
